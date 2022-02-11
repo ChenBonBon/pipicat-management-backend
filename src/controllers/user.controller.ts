@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { ParseDatePipe } from 'src/pipes/ParseDatePipe';
 import { UserService } from '../services/user.service';
 
 export class FetchUsersBody {
@@ -53,8 +55,14 @@ export class FetchUserFilters {
     description: '用户状态',
   })
   @IsOptional()
-  @IsIn(['enabled', 'disabled'])
-  status?: 'enabled' | 'disabled';
+  @IsIn(['enabled', 'disabled', 'locked'])
+  status?: 'enabled' | 'disabled' | 'locked';
+
+  @ApiProperty({
+    description: '出生日期',
+  })
+  @IsOptional()
+  birthday?: any;
 }
 
 export class AddUserBody {
@@ -79,7 +87,7 @@ export class AddUserBody {
   })
   @IsOptional()
   @IsDate()
-  readonly birthday?: string;
+  readonly birthday?: Date;
 
   @ApiPropertyOptional({
     description: '手机号',
@@ -98,6 +106,15 @@ export class AddUserBody {
   readonly email?: string;
 }
 
+export class UpdateUserBody {
+  @ApiProperty({
+    description: '用户状态',
+  })
+  @IsOptional()
+  @IsIn(['enabled', 'disabled', 'locked'])
+  status?: 'enabled' | 'disabled' | 'locked';
+}
+
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -107,11 +124,14 @@ export class UserController {
   async fetchUsers(
     @Query('current', new ParseIntPipe()) current: number,
     @Query('pageSize', new ParseIntPipe()) pageSize: number,
-    @Query('name') name: string,
-    @Query('gender') gender: 'male' | 'female',
-    @Query('status') status: 'enabled' | 'disabled',
+    @Query('name') name: string | undefined,
+    @Query('gender') gender: 'male' | 'female' | undefined,
+    @Query('status') status: 'enabled' | 'disabled' | undefined,
+    @Query('startDate', new ParseDatePipe()) startDate: Date | undefined,
+    @Query('endDate', new ParseDatePipe()) endDate: Date | undefined,
   ) {
     const filters: FetchUserFilters = {};
+    const birthdayFilter: any = {};
 
     if (name) {
       filters.name = { $regex: name };
@@ -122,6 +142,16 @@ export class UserController {
     if (status) {
       filters.status = status;
     }
+    if (startDate) {
+      birthdayFilter.$gte = startDate;
+    }
+    if (endDate) {
+      birthdayFilter.$lt = endDate;
+    }
+    if (Object.keys(birthdayFilter).length > 0) {
+      filters.birthday = birthdayFilter;
+    }
+
     const res = await this.userService.fetchUsers(
       {
         current,
@@ -155,12 +185,26 @@ export class UserController {
   }
 
   @Post()
-  async addUser(@Body() addUserBody: AddUserBody) {
-    return this.userService.addUser(addUserBody);
+  async addUser(
+    @Body('name') name: string,
+    @Body('gender') gender?: 'male' | 'female',
+    @Body('birthday', new ParseDatePipe()) birthday?: Date,
+    @Body('mobile') mobile?: string,
+    @Body('email') email?: string,
+  ) {
+    return this.userService.addUser({ name, gender, birthday, mobile, email });
   }
 
   @Delete(':id')
   async deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
+  }
+
+  @Patch(':id')
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateUserBody: UpdateUserBody,
+  ) {
+    return this.userService.updateUser(id, updateUserBody);
   }
 }

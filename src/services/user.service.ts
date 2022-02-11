@@ -5,6 +5,7 @@ import {
   AddUserBody,
   FetchUserFilters,
   FetchUsersBody,
+  UpdateUserBody,
 } from 'src/controllers/user.controller';
 import { UserDocument } from 'src/schemas/user.schema';
 
@@ -46,6 +47,25 @@ export class UserService {
         return {
           code: 0,
           message: `Delete user ${id} successfully.`,
+        };
+      }
+    } catch (error) {
+      throw new NotFoundException(error);
+    }
+  }
+
+  async updateUser(id: string, updateUserBody: UpdateUserBody) {
+    try {
+      const updatedUser = await this.userModel.updateOne(
+        { _id: id },
+        {
+          $set: updateUserBody,
+        },
+      );
+      if (updatedUser) {
+        return {
+          code: 0,
+          message: `Update user ${id} successfully.`,
         };
       }
     } catch (error) {

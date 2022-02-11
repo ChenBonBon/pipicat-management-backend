@@ -12,7 +12,7 @@ export class User extends Document {
   gender: 'male' | 'female';
 
   @Prop()
-  birthday: string;
+  birthday: Date;
 
   @Prop()
   mobile: string;
@@ -21,7 +21,7 @@ export class User extends Document {
   email: string;
 
   @Prop({ default: 'enabled' })
-  status: 'enabled' | 'disabled';
+  status: 'enabled' | 'disabled' | 'locked';
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
