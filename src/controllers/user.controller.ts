@@ -16,28 +16,13 @@ import {
   IsIn,
   IsMobilePhone,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { ParseDatePipe } from 'src/pipes/ParseDatePipe';
 import { UserService } from '../services/user.service';
 
-export class FetchUsersBody {
-  @ApiProperty({
-    description: '页码',
-  })
-  @IsNumber()
-  readonly current: number;
-
-  @ApiProperty({
-    description: '每页条数',
-  })
-  @IsNumber()
-  readonly pageSize: number;
-}
-
-export class FetchUserFilters {
+export class FetchUsersFilters {
   @ApiProperty({
     description: '姓名',
   })
@@ -153,6 +138,84 @@ export class UpdateUserBody {
   status?: 'enabled' | 'locked';
 }
 
+export class FetchRolesFilters {
+  @ApiProperty({
+    description: '姓名',
+  })
+  @IsOptional()
+  name?: any;
+
+  @ApiProperty({
+    description: '性别',
+  })
+  @IsOptional()
+  @IsIn(['male', 'female'])
+  gender?: 'male' | 'female';
+
+  @ApiProperty({
+    description: '用户状态',
+  })
+  @IsOptional()
+  @IsIn(['enabled', 'locked'])
+  status?: any;
+
+  @ApiProperty({
+    description: '出生日期',
+  })
+  @IsOptional()
+  birthday?: any;
+}
+
+export class AddRoleBody {
+  @ApiProperty({
+    description: '角色名',
+  })
+  @IsNotEmpty()
+  @IsString()
+  readonly name: string;
+
+  @ApiPropertyOptional({
+    description: '角色描述',
+    default: '',
+  })
+  @IsOptional()
+  @IsString()
+  readonly description?: string;
+
+  @ApiPropertyOptional({
+    description: '状态',
+    default: false,
+  })
+  @IsOptional()
+  @IsIn(['enabled', 'disabled'])
+  readonly status?: 'enabled' | 'disabled';
+}
+
+export class UpdateRoleBody {
+  @ApiProperty({
+    description: '角色名',
+  })
+  @IsOptional()
+  @IsString()
+  readonly name: string;
+
+  @ApiPropertyOptional({
+    description: '角色描述',
+    default: '',
+  })
+  @IsOptional()
+  @IsString()
+  readonly description?: string;
+
+  @ApiPropertyOptional({
+    description: '状态',
+    default: false,
+  })
+  @IsOptional()
+  @IsIn(['enabled', 'disabled'])
+  readonly status?: 'enabled' | 'disabled';
+}
+
 @ApiTags('user')
 @Controller('user')
 export class UserController {
@@ -168,7 +231,7 @@ export class UserController {
     @Query('startDate', new ParseDatePipe()) startDate: Date | undefined,
     @Query('endDate', new ParseDatePipe()) endDate: Date | undefined,
   ) {
-    const filters: FetchUserFilters = {
+    const filters: FetchUsersFilters = {
       status: { $ne: 'disabled' },
     };
     const birthdayFilter: any = {};
@@ -224,9 +287,73 @@ export class UserController {
     };
   }
 
+  @Get('/roles')
+  async fetchRoles(
+    @Query('current', new ParseIntPipe()) current: number,
+    @Query('pageSize', new ParseIntPipe()) pageSize: number,
+    @Query('name') name: string | undefined,
+    @Query('status') status: 'enabled' | 'disabled' | undefined,
+  ) {
+    const filters: FetchRolesFilters = {};
+
+    if (name) {
+      filters.name = { $regex: name };
+    }
+
+    if (status) {
+      filters.status = status;
+    }
+
+    const res = await this.userService.fetchRoles(
+      {
+        current,
+        pageSize,
+      },
+      filters,
+    );
+
+    if (res) {
+      const data = res.data.map((role) => {
+        const { _id, name, description, status } = role;
+        return {
+          id: _id,
+          name,
+          description,
+          status,
+        };
+      });
+
+      return {
+        data,
+        total: res.total,
+      };
+    }
+    return {
+      data: [],
+      total: 0,
+    };
+  }
+
+  @Get('/role/:id')
+  async fetchRole(@Param('id') id: string) {
+    const role = await this.userService.fetchRole(id);
+
+    if (role) {
+      const { _id, name, description, status } = role;
+
+      return {
+        id: _id,
+        name,
+        description,
+        status,
+      };
+    }
+  }
+
   @Get(':id')
   async fetchUser(@Param('id') id: string) {
     const user = await this.userService.fetchUser(id);
+
     if (user) {
       const { _id, name, gender, birthday, mobile, email, status } = user;
 
@@ -258,6 +385,20 @@ export class UserController {
     return this.userService.deleteUser(id);
   }
 
+  @Patch('role/:id')
+  async updateRole(
+    @Param('id') id: string,
+    @Body('name') name: string,
+    @Body('description') description?: string,
+    @Body('status') status?: 'enabled' | 'disabled',
+  ) {
+    return this.userService.updateRole(id, {
+      name,
+      description,
+      status,
+    });
+  }
+
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
@@ -276,5 +417,14 @@ export class UserController {
       email,
       status,
     });
+  }
+
+  @Post('/role')
+  async addRole(
+    @Body('name') name: string,
+    @Body('description') description?: string,
+    @Body('status') status?: 'enabled' | 'disabled',
+  ) {
+    return this.userService.addRole({ name, description, status });
   }
 }
