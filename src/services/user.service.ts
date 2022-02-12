@@ -100,6 +100,12 @@ export class UserService {
     return { data, total };
   }
 
+  async fetchRoleOptions() {
+    const data = await this.roleModel.find({ status: { $ne: 'disabled' } });
+
+    return data;
+  }
+
   async fetchRole(id: string) {
     try {
       const data = await this.roleModel.findById(id);

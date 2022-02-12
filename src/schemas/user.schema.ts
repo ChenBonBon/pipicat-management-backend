@@ -21,6 +21,9 @@ export class User extends Document {
   @Prop()
   email: string;
 
+  @Prop()
+  roleId: string;
+
   @Prop({ default: 'enabled' })
   status: 'enabled' | 'disabled' | 'locked';
 }

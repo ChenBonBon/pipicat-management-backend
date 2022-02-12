@@ -37,6 +37,13 @@ export class FetchUsersFilters {
   gender?: 'male' | 'female';
 
   @ApiProperty({
+    description: '角色',
+  })
+  @IsOptional()
+  @IsString()
+  roleId?: any;
+
+  @ApiProperty({
     description: '用户状态',
   })
   @IsOptional()
@@ -89,6 +96,14 @@ export class AddUserBody {
   @IsOptional()
   @IsEmail()
   readonly email?: string;
+
+  @ApiPropertyOptional({
+    description: '角色',
+    default: '',
+  })
+  @IsOptional()
+  @IsString()
+  readonly roleId?: string;
 }
 
 export class UpdateUserBody {
@@ -130,6 +145,15 @@ export class UpdateUserBody {
   @IsOptional()
   @IsEmail()
   readonly email?: string;
+
+  @ApiPropertyOptional({
+    description: '角色',
+    default: '',
+  })
+  @IsOptional()
+  @IsString()
+  readonly roleId?: string;
+
   @ApiProperty({
     description: '用户状态',
   })
@@ -227,6 +251,7 @@ export class UserController {
     @Query('pageSize', new ParseIntPipe()) pageSize: number,
     @Query('name') name: string | undefined,
     @Query('gender') gender: 'male' | 'female' | undefined,
+    @Query('roleId') roleId: string,
     @Query('status') status: 'enabled' | 'locked' | undefined,
     @Query('startDate', new ParseDatePipe()) startDate: Date | undefined,
     @Query('endDate', new ParseDatePipe()) endDate: Date | undefined,
@@ -241,6 +266,9 @@ export class UserController {
     }
     if (gender) {
       filters.gender = gender;
+    }
+    if (roleId) {
+      filters.roleId = roleId;
     }
     if (status) {
       filters.status = status;
@@ -264,7 +292,8 @@ export class UserController {
     );
     if (res) {
       const data = res.data.map((user) => {
-        const { _id, name, gender, birthday, mobile, email, status } = user;
+        const { _id, name, gender, birthday, mobile, email, roleId, status } =
+          user;
         return {
           id: _id,
           name,
@@ -272,6 +301,7 @@ export class UserController {
           birthday,
           mobile,
           email,
+          roleId,
           status,
         };
       });
@@ -334,6 +364,24 @@ export class UserController {
     };
   }
 
+  @Get('/roles/options')
+  async fetchRoleOptions() {
+    const res = await this.userService.fetchRoleOptions();
+
+    if (res) {
+      const roles = res.map((role) => {
+        const { _id, name } = role;
+        return {
+          id: _id,
+          name,
+        };
+      });
+
+      return roles;
+    }
+    return [];
+  }
+
   @Get('/role/:id')
   async fetchRole(@Param('id') id: string) {
     const role = await this.userService.fetchRole(id);
@@ -355,7 +403,8 @@ export class UserController {
     const user = await this.userService.fetchUser(id);
 
     if (user) {
-      const { _id, name, gender, birthday, mobile, email, status } = user;
+      const { _id, name, gender, birthday, mobile, email, roleId, status } =
+        user;
 
       return {
         id: _id,
@@ -364,6 +413,7 @@ export class UserController {
         birthday,
         mobile,
         email,
+        roleId,
         status,
       };
     }
@@ -376,8 +426,16 @@ export class UserController {
     @Body('birthday', new ParseDatePipe()) birthday?: Date,
     @Body('mobile') mobile?: string,
     @Body('email') email?: string,
+    @Body('roleId') roleId?: string,
   ) {
-    return this.userService.addUser({ name, gender, birthday, mobile, email });
+    return this.userService.addUser({
+      name,
+      gender,
+      birthday,
+      mobile,
+      email,
+      roleId,
+    });
   }
 
   @Delete(':id')
@@ -407,6 +465,7 @@ export class UserController {
     @Body('birthday', new ParseDatePipe()) birthday?: Date,
     @Body('mobile') mobile?: string,
     @Body('email') email?: string,
+    @Body('roleId') roleId?: string,
     @Body('status') status?: 'enabled' | 'locked',
   ) {
     return this.userService.updateUser(id, {
@@ -415,6 +474,7 @@ export class UserController {
       birthday,
       mobile,
       email,
+      roleId,
       status,
     });
   }
