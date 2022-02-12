@@ -55,8 +55,8 @@ export class FetchUserFilters {
     description: '用户状态',
   })
   @IsOptional()
-  @IsIn(['enabled', 'disabled', 'locked'])
-  status?: 'enabled' | 'disabled' | 'locked';
+  @IsIn(['enabled', 'locked'])
+  status?: any;
 
   @ApiProperty({
     description: '出生日期',
@@ -108,11 +108,49 @@ export class AddUserBody {
 
 export class UpdateUserBody {
   @ApiProperty({
+    description: '姓名',
+  })
+  @IsOptional()
+  @IsString()
+  readonly name?: string;
+
+  @ApiPropertyOptional({
+    description: '性别',
+    default: 'male',
+  })
+  @IsOptional()
+  @IsIn(['male', 'female'])
+  readonly gender?: 'male' | 'female';
+
+  @ApiPropertyOptional({
+    description: '出生日期',
+    default: new Date(),
+  })
+  @IsOptional()
+  @IsDate()
+  readonly birthday?: Date;
+
+  @ApiPropertyOptional({
+    description: '手机号',
+    default: '17621627976',
+  })
+  @IsOptional()
+  @IsMobilePhone('zh-CN')
+  readonly mobile?: string;
+
+  @ApiPropertyOptional({
+    description: '邮箱',
+    default: 'per_cherry@163.com',
+  })
+  @IsOptional()
+  @IsEmail()
+  readonly email?: string;
+  @ApiProperty({
     description: '用户状态',
   })
   @IsOptional()
-  @IsIn(['enabled', 'disabled', 'locked'])
-  status?: 'enabled' | 'disabled' | 'locked';
+  @IsIn(['enabled', 'locked'])
+  status?: 'enabled' | 'locked';
 }
 
 @ApiTags('user')
@@ -126,11 +164,13 @@ export class UserController {
     @Query('pageSize', new ParseIntPipe()) pageSize: number,
     @Query('name') name: string | undefined,
     @Query('gender') gender: 'male' | 'female' | undefined,
-    @Query('status') status: 'enabled' | 'disabled' | undefined,
+    @Query('status') status: 'enabled' | 'locked' | undefined,
     @Query('startDate', new ParseDatePipe()) startDate: Date | undefined,
     @Query('endDate', new ParseDatePipe()) endDate: Date | undefined,
   ) {
-    const filters: FetchUserFilters = {};
+    const filters: FetchUserFilters = {
+      status: { $ne: 'disabled' },
+    };
     const birthdayFilter: any = {};
 
     if (name) {
@@ -184,6 +224,24 @@ export class UserController {
     };
   }
 
+  @Get(':id')
+  async fetchUser(@Param('id') id: string) {
+    const user = await this.userService.fetchUser(id);
+    if (user) {
+      const { _id, name, gender, birthday, mobile, email, status } = user;
+
+      return {
+        id: _id,
+        name,
+        gender,
+        birthday,
+        mobile,
+        email,
+        status,
+      };
+    }
+  }
+
   @Post()
   async addUser(
     @Body('name') name: string,
@@ -203,8 +261,20 @@ export class UserController {
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
-    @Body() updateUserBody: UpdateUserBody,
+    @Body('name') name: string,
+    @Body('gender') gender?: 'male' | 'female',
+    @Body('birthday', new ParseDatePipe()) birthday?: Date,
+    @Body('mobile') mobile?: string,
+    @Body('email') email?: string,
+    @Body('status') status?: 'enabled' | 'locked',
   ) {
-    return this.userService.updateUser(id, updateUserBody);
+    return this.userService.updateUser(id, {
+      name,
+      gender,
+      birthday,
+      mobile,
+      email,
+      status,
+    });
   }
 }

@@ -24,6 +24,16 @@ export class UserService {
     return { data, total };
   }
 
+  async fetchUser(id: string) {
+    try {
+      const data = await this.userModel.findById(id);
+
+      return data;
+    } catch (error) {
+      throw new NotFoundException(error);
+    }
+  }
+
   async addUser(addUserBody: AddUserBody) {
     const createdUser = new this.userModel(addUserBody);
     const res = await createdUser.save();
