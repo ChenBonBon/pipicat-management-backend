@@ -33,6 +33,17 @@ export class UserController {
     @Query('startDate', new ParseDatePipe()) startDate: Date | undefined,
     @Query('endDate', new ParseDatePipe()) endDate: Date | undefined,
   ) {
+    logger.log('/user');
+    logger.log(`params:
+      current: ${current}
+      pageSize: ${pageSize}
+      name: ${name}
+      gender: ${gender}
+      roleId: ${roleId}
+      status: ${status}
+      startDate: ${startDate}
+      endDate: ${endDate}
+    `);
     const filters: FetchUsersFilters = {
       status: { $ne: 'disabled' },
     };
