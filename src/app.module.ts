@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Log4jsModule } from '@nestx-log4js/core';
+import { RoleModule } from './modules/role/role.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -12,6 +13,7 @@ import { UserModule } from './modules/user/user.module';
       pass: 'chenroc1001',
     }),
     UserModule,
+    RoleModule,
   ],
 })
 export class AppModule {}

@@ -10,7 +10,7 @@ import { RoleDocument, UserDocument } from 'src/schemas/user.schema';
 import { AddRoleBody, FetchRolesFilters, UpdateRoleBody } from './role.types';
 
 @Injectable()
-export class UserService {
+export class RoleService {
   constructor(
     @InjectModel('User') private userModel: Model<UserDocument>,
     @InjectModel('Role') private roleModel: Model<RoleDocument>,

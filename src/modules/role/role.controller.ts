@@ -10,15 +10,15 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { UserService } from './role.service';
+import { RoleService } from './role.service';
 import { FetchRolesFilters } from './role.types';
 
-const logger = new Logger('user.service');
+const logger = new Logger('role.service');
 
-@ApiTags('user')
-@Controller('user')
-export class UserController {
-  constructor(private readonly userService: UserService) {}
+@ApiTags('role')
+@Controller('role')
+export class RoleController {
+  constructor(private readonly roleService: RoleService) {}
 
   @Get('/roles')
   async fetchRoles(
@@ -37,7 +37,7 @@ export class UserController {
       filters.status = status;
     }
 
-    const res = await this.userService.fetchRoles(
+    const res = await this.roleService.fetchRoles(
       {
         current,
         pageSize,
@@ -69,7 +69,7 @@ export class UserController {
 
   @Get('/roles/options')
   async fetchRoleOptions() {
-    const res = await this.userService.fetchRoleOptions();
+    const res = await this.roleService.fetchRoleOptions();
 
     if (res) {
       const roles = res.map((role) => {
@@ -87,7 +87,7 @@ export class UserController {
 
   @Get('/role/:id')
   async fetchRole(@Param('id') id: string) {
-    const role = await this.userService.fetchRole(id);
+    const role = await this.roleService.fetchRole(id);
 
     if (role) {
       const { _id, name, description, status } = role;
@@ -107,7 +107,7 @@ export class UserController {
     @Body('description') description?: string,
     @Body('status') status?: 'enabled' | 'disabled',
   ) {
-    return this.userService.updateRole(id, {
+    return this.roleService.updateRole(id, {
       name,
       description,
       status,
@@ -120,6 +120,6 @@ export class UserController {
     @Body('description') description?: string,
     @Body('status') status?: 'enabled' | 'disabled',
   ) {
-    return this.userService.addRole({ name, description, status });
+    return this.roleService.addRole({ name, description, status });
   }
 }
