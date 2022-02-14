@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Logger,
   Param,
   ParseIntPipe,
   Patch,
@@ -14,8 +13,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { ParseDatePipe } from 'src/pipes/ParseDatePipe';
 import { UserService } from './user.service';
 import { FetchUsersFilters } from './user.types';
-
-const logger = new Logger('user.service');
 
 @ApiTags('user')
 @Controller('user')
@@ -32,18 +29,8 @@ export class UserController {
     @Query('status') status: 'enabled' | 'locked' | undefined,
     @Query('startDate', new ParseDatePipe()) startDate: Date | undefined,
     @Query('endDate', new ParseDatePipe()) endDate: Date | undefined,
+    @Query() params: FetchUsersFilters,
   ) {
-    logger.log('/user');
-    logger.log(`params:
-      current: ${current}
-      pageSize: ${pageSize}
-      name: ${name}
-      gender: ${gender}
-      roleId: ${roleId}
-      status: ${status}
-      startDate: ${startDate}
-      endDate: ${endDate}
-    `);
     const filters: FetchUsersFilters = {
       status: { $ne: 'disabled' },
     };

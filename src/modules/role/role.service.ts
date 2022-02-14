@@ -6,7 +6,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FetchListBody } from 'src/declaration';
-import { RoleDocument, UserDocument } from 'src/schemas/user.schema';
+import { UserDocument } from '../user/user.schema';
+import { RoleDocument } from './role.schema';
 import { AddRoleBody, FetchRolesFilters, UpdateRoleBody } from './role.types';
 
 @Injectable()

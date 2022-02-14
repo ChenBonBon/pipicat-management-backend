@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FetchListBody } from 'src/declaration';
-import { RoleDocument, UserDocument } from 'src/schemas/user.schema';
+import { RoleDocument } from '../role/role.schema';
+import { UserDocument } from './user.schema';
 import { AddUserBody, FetchUsersFilters, UpdateUserBody } from './user.types';
 
 @Injectable()

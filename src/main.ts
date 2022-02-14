@@ -1,10 +1,8 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Log4jsLogger } from '@nestx-log4js/core';
 import { AppModule } from './app.module';
-
-const logger = new Logger('main.ts');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -24,6 +22,4 @@ async function bootstrap() {
 
   await app.listen(11252);
 }
-bootstrap().then(() => {
-  logger.log('App is running at 11252.');
-});
+bootstrap();

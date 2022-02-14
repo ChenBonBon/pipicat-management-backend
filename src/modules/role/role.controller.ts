@@ -20,7 +20,7 @@ const logger = new Logger('role.service');
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
-  @Get('/roles')
+  @Get()
   async fetchRoles(
     @Query('current', new ParseIntPipe()) current: number,
     @Query('pageSize', new ParseIntPipe()) pageSize: number,
@@ -67,7 +67,7 @@ export class RoleController {
     };
   }
 
-  @Get('/roles/options')
+  @Get('options')
   async fetchRoleOptions() {
     const res = await this.roleService.fetchRoleOptions();
 
@@ -85,7 +85,7 @@ export class RoleController {
     return [];
   }
 
-  @Get('/role/:id')
+  @Get(':id')
   async fetchRole(@Param('id') id: string) {
     const role = await this.roleService.fetchRole(id);
 
@@ -100,7 +100,7 @@ export class RoleController {
     }
   }
 
-  @Patch('role/:id')
+  @Patch(':id')
   async updateRole(
     @Param('id') id: string,
     @Body('name') name: string,
@@ -114,7 +114,7 @@ export class RoleController {
     });
   }
 
-  @Post('/role')
+  @Post()
   async addRole(
     @Body('name') name: string,
     @Body('description') description?: string,
