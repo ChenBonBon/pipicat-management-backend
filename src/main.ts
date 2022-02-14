@@ -1,8 +1,8 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Log4jsLogger } from '@nestx-log4js/core';
-import { AppModule } from './app.module';
+import { AppModule, logger } from './app.module';
+import { HttpExceptionFilter } from './filters/HttpExceptionFilter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -17,9 +17,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  app.useLogger(app.get(Log4jsLogger));
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(11252);
+
+  logger.log(`Server is listening on ${await app.getUrl()}`);
 }
 bootstrap();
