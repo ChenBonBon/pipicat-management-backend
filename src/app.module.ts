@@ -1,27 +1,37 @@
 import { Logger, Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-} from 'nest-winston';
+import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import 'winston-daily-rotate-file';
 import { HttpInterceptor } from './interceptors/HttpInterceptor';
 import { RoleModule } from './modules/role/role.module';
 import { UserModule } from './modules/user/user.module';
 
+const logFormat = winston.format.combine(
+  winston.format.colorize(),
+  winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss' }),
+  winston.format.align(),
+  winston.format.printf((info) => {
+    return `${info.timestamp} ${info.level}: ${info.message}`;
+  }),
+);
+
+const transport = new winston.transports.DailyRotateFile({
+  filename: 'logs/pipicat-%DATE%.log',
+  datePattern: 'YYYY-MM-DD-HH',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '14d',
+});
+
 export const logger = WinstonModule.createLogger({
   level: 'verbose',
+  format: logFormat,
   transports: [
+    transport,
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.ms(),
-        nestWinstonModuleUtilities.format.nestLike('pipicat'),
-      ),
-    }),
-    new winston.transports.File({
-      filename: 'logs/example.log',
+      level: 'info',
     }),
   ],
 });
