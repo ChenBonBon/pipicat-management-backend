@@ -22,6 +22,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
           statusCode: status,
           timestamp: dayjs().format('YYYY/MM/DD HH:mm:ss'),
           path: request.url,
+          stack: exception.stack,
         },
         null,
         '\t',
