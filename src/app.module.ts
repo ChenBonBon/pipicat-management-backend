@@ -5,6 +5,7 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
 import { HttpInterceptor } from './interceptors/HttpInterceptor';
+import { PermissionModule } from './modules/permission/permission.module';
 import { RoleModule } from './modules/role/role.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -45,6 +46,7 @@ export const logger = WinstonModule.createLogger({
     }),
     UserModule,
     RoleModule,
+    PermissionModule,
   ],
   providers: [
     {

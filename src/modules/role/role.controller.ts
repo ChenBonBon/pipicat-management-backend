@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Logger,
   Param,
   ParseIntPipe,
   Patch,
@@ -12,8 +11,6 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { RoleService } from './role.service';
 import { FetchRolesFilters } from './role.types';
-
-const logger = new Logger('role.service');
 
 @ApiTags('role')
 @Controller('role')

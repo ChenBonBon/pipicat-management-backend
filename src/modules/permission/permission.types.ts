@@ -1,15 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class FetchRolesFilters {
+export class FetchPermissionsFilters {
   @ApiProperty({
-    description: '角色名',
+    description: '权限名',
   })
   @IsOptional()
   name?: any;
 
   @ApiProperty({
-    description: '角色状态',
+    description: '权限状态',
   })
   @IsOptional()
   @IsIn(['enabled', 'disabled'])
