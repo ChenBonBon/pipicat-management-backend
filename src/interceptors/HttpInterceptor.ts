@@ -2,10 +2,10 @@ import {
   CallHandler,
   ExecutionContext,
   Injectable,
-  Logger,
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
+import { logger } from 'src/app.module';
 
 const parseQuery = (query: string) => {
   const res = {};
@@ -30,8 +30,6 @@ export class HttpInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const { method, body, _parsedUrl } = request;
     const { pathname, query } = _parsedUrl;
-
-    const logger = new Logger(context.getClass().name);
 
     logger.log(
       JSON.stringify(
