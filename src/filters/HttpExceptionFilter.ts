@@ -17,16 +17,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
 
     logger.error(
-      JSON.stringify(
-        {
-          statusCode: status,
-          timestamp: dayjs().format('YYYY/MM/DD HH:mm:ss'),
-          path: request.url,
-          stack: exception.stack,
-        },
-        null,
-        '\t',
-      ),
+      `
+${exception.stack}
+${JSON.stringify(
+  {
+    path: request.url,
+    statusCode: status,
+    timestamp: dayjs().format('YYYY/MM/DD HH:mm:ss'),
+  },
+  null,
+  '\t',
+)}
+      `,
     );
 
     response.status(status).json(exception.getResponse());
